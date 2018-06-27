@@ -4,8 +4,9 @@ const ContextSymbol = Symbol('@Context')
 const EnvironmentSymbol = Symbol('@Environment')
 
 const getDeep = require('./lib/get-deep')
+// TODO: setDeep
 
-class Debut {
+class Executor {
   constructor (state = {}, path = []) {
     const globals = {Date}
 
@@ -27,4 +28,4 @@ class Debut {
   }
 }
 
-module.exports = Debut
+module.exports = Executor
