@@ -1,14 +1,14 @@
 {
   "name": "skydo",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.0",
+  "description": "A JavaScript development environment for trying out ideas.",
   "main": "index.js",
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch"
   },
   "keywords": [],
-  "author": "",
+  "author": "Allain Lalonde <allain.lalonde@gmail.com>",
   "license": "ISC",
   "devDependencies": {
     "jest": "^23.2.0"
