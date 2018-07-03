@@ -1,0 +1,13 @@
+#!/usr/bin/env node
+
+const repl = require("repl")
+
+const Executor = require('../Executor')
+const executor = new Executor({})
+
+repl.start({
+  prompt: '> ',
+  eval(command, context, filename, cb) {
+    executor.exec(command).then(result => cb(null, result), cb)
+  }
+})
