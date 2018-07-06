@@ -1,19 +1,17 @@
 const vm = require('vm')
 
 const PathSymbol = Symbol('@path')
-const StateSymbol = Symbol('@state')
 const EnvironmentHandler = require('./proxies/Environment')
 const Contextable = require('./proxies/Contextable')
 
 class Executor {
-  constructor (state) {
-    if (!state) throw new Error('state not given to executor')
+  constructor () {
     this[PathSymbol] = []
-
-    this[StateSymbol] = state
   }
 
-  async exec (code) {
+  async exec (code, state) {
+    if (!state) throw new Error('state not given to executor')
+
     const cd = key => {
       if (key === '..') {
         this[PathSymbol].pop()
@@ -25,7 +23,7 @@ class Executor {
     const globals = { Date, cd }
 
     const environment = new Proxy(
-      new Proxy(this[StateSymbol], Contextable(this[PathSymbol])),
+      new Proxy(state, Contextable(this[PathSymbol])),
       EnvironmentHandler(globals)
     )
 

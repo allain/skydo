@@ -1,13 +1,17 @@
 #!/usr/bin/env node
 
 const repl = require("repl")
-
 const Executor = require('../Executor')
-const executor = new Executor({})
+const Store = require("../Store")
+
+const executor = new Executor()
+const store = new Store()
 
 repl.start({
   prompt: '> ',
   eval(command, context, filename, cb) {
-    executor.exec(command).then(result => cb(null, result), cb)
+    store.transact(state => {
+      return executor.exec(command, state)
+    }).then(result => cb(null, result), cb)
   }
 })
