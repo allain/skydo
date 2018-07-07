@@ -1,5 +1,5 @@
 /* globals describe, it, expect */
-const {edit, edits} = require('./Editor')
+const {edit, edits, DELETED} = require('./Editor')
 
 describe('editor', () => {
   it('supports simple edits', () => {
@@ -43,5 +43,27 @@ describe('editor', () => {
     const e = edit({ a: { b: { c: 1 } } })
     e.a.e = 2
     expect(edits(e)).toEqual({ a: { e: 2 } })
+  })
+
+  it('exports DELETED Symbol', () => {
+    expect(DELETED).toBeDefined()
+  })
+
+  it('supports deletion', () => {
+    const src = {a: 1}
+    const e = edit(src)
+    delete e.a
+    expect(e.a).toBeUndefined()
+    expect(src.a).toEqual(1)
+    expect(Object.keys(edits(e))).toEqual(['a'])
+  })
+
+  it('supports deep deletion', () => {
+    const src = {a: 1}
+    const e1 = edit(src)
+    delete e1.a
+    const e2 = edit(e1)
+    expect(e2.a).toBeUndefined()
+    expect(src.a).toEqual(1)
   })
 })

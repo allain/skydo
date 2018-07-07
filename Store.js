@@ -1,4 +1,4 @@
-const compose = require('./compose')
+const compose = require('./proxies/compose')
 
 const {edit, edits} = require('./Editor')
 

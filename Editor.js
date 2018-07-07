@@ -2,7 +2,11 @@ const isObject = require('./lib/is-object')
 const mapObj = require('./lib/map-object')
 
 const EditsSymbol = Symbol('@Edits')
+const DELETED = Symbol('@Delete')
 
+module.exports.DELETED = DELETED
+
+// TODO: Handle the deletion of properties
 module.exports.edit = function edit (target) {
   const edits = {}
 
@@ -10,9 +14,13 @@ module.exports.edit = function edit (target) {
     get (target, key) {
       if (key === EditsSymbol) return edits
 
-      if (edits.hasOwnProperty(key)) return edits[key]
+      if (edits.hasOwnProperty(key)) {
+        const value = edits[key]
+        return (value === DELETED) ? undefined : edits[key]
+      }
 
       const value = target[key]
+
       return isObject(value) ? (edits[key] = edit(value)) : value
     },
 
@@ -21,9 +29,14 @@ module.exports.edit = function edit (target) {
       return value
     },
 
-    ownKeys: () => [
+    ownKeys: () => {
+      const keys =
+
+    [
       ...new Set([...Object.keys(edits), ...Object.keys(target)])
-    ],
+    ]
+      return keys.filter(key => edits[key] !== DELETED)
+    },
 
     getOwnPropertyDescriptor: (target, key) => {
       if (edits.hasOwnProperty(key) || target.hasOwnProperty(key)) {
@@ -33,6 +46,10 @@ module.exports.edit = function edit (target) {
           configurable: true
         }
       }
+    },
+
+    deleteProperty (target, key) {
+      edits[key] = DELETED
     }
   }
 
@@ -45,16 +62,12 @@ module.exports.edits = draft => {
 }
 
 const reduceEdits = obj => {
-  const edits = obj[EditsSymbol]
-  if (edits) return reduceEdits(obj[EditsSymbol])
+  if (!isObject(obj)) return obj
 
-  const reduced = JSON.parse(
-    JSON.stringify(
-      mapObj((value, key) => (isObject(value) ? reduceEdits(value) : value))(
-        obj
-      )
-    )
-  )
+  const edits = obj[EditsSymbol]
+  if (edits) return reduceEdits(edits)
+
+  const reduced = mapObj((value, key) => reduceEdits(value))(obj)
 
   return Object.keys(reduced).length ? reduced : undefined
 }

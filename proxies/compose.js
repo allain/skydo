@@ -1,5 +1,5 @@
-const isObject = require('./lib/is-object')
-const findFirst = require('./lib/find-first')
+const isObject = require('../lib/is-object')
+const findFirst = require('../lib/find-first')
 
 module.exports = function compose (...sources) {
   const keys = () =>

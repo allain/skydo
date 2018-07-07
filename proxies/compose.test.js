@@ -1,9 +1,11 @@
+/* globals describe, it, expect */
+
 const compose = require('./compose')
 
 describe('compose', () => {
-  it('can be created empty', () => {
+  it('can be created empty', () =>
     expect(compose()).toBeTruthy()
-  })
+  )
 
   it('reading, object works', () => {
     const s = compose({ x: { y: 1 } }, {})
@@ -39,5 +41,11 @@ describe('compose', () => {
     const s = compose({ a: 1 }, { b: 2 }, { c: 3 })
     const r = { a: 1, b: 2, c: 3 }
     expect(s.toString()).toEqual(r.toString())
+  })
+
+  it('makes composed object read-only', () => {
+    const s = compose({a: 1})
+    expect(() => (s.a = 10)).toThrowError()
+    expect(() => (s.x = 10)).toThrowError()
   })
 })
