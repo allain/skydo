@@ -5,13 +5,15 @@ const Executor = require('../Executor')
 const Store = require("../Store")
 
 const executor = new Executor()
+
+// TODO: Use a persistent store
 const store = new Store()
 
 repl.start({
   prompt: '> ',
   eval(command, context, filename, cb) {
-    store.transact(state => {
-      return executor.exec(command, state)
-    }).then(result => cb(null, result), cb)
+    store.transact(state => 
+      executor.exec(command, state)
+    ).then(result => cb(null, result), cb)
   }
 })

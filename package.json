@@ -4,6 +4,7 @@
   "description": "A JavaScript development environment for trying out ideas.",
   "main": "index.js",
   "scripts": {
+    "start": "node bin/run",
     "test": "jest",
     "test:watch": "jest --watch"
   },
@@ -12,5 +13,8 @@
   "license": "ISC",
   "devDependencies": {
     "jest": "^23.2.0"
+  },
+  "dependencies": {
+    "debug": "^3.1.0"
   }
 }

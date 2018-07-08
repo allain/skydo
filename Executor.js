@@ -20,7 +20,7 @@ class Executor {
       }
     }
 
-    const globals = { Date, cd }
+    const globals = { Object, Date, cd }
 
     const environment = new Proxy(
       new Proxy(state, Contextable(this[PathSymbol])),

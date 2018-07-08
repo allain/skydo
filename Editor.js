@@ -1,73 +1,50 @@
 const isObject = require('./lib/is-object')
 const mapObj = require('./lib/map-object')
+const isEmptyObject = require('./lib/is-empty-object')
+const uniqueKeys = require('./lib/unique-keys')
 
-const EditsSymbol = Symbol('@Edits')
+const EDITS = Symbol('@Edits')
 const DELETED = Symbol('@Delete')
 
-module.exports.DELETED = DELETED
+function edit (target, edits = {}) {
+  if (!isObject(target) || target[EDITS]) return target
 
-// TODO: Handle the deletion of properties
-module.exports.edit = function edit (target) {
-  const edits = {}
+  const getEdited = (target, key) =>
+    edits.hasOwnProperty(key) ? edits[key] : (edits[key] = edit(target[key]))
 
-  const handler = {
+  return new Proxy(target, {
     get (target, key) {
-      if (key === EditsSymbol) return edits
-
-      if (edits.hasOwnProperty(key)) {
-        const value = edits[key]
-        return (value === DELETED) ? undefined : edits[key]
-      }
-
-      const value = target[key]
-
-      return isObject(value) ? (edits[key] = edit(value)) : value
+      if (key === EDITS) return edits
+      const result = getEdited(target, key)
+      return (result === DELETED) ? undefined : result
     },
 
     set (_, key, value) {
-      edits[key] = value
-      return value
+      edits[key] = (!isObject(value) || value[EDITS]) ? value : edit({}, value)
     },
 
-    ownKeys: () => {
-      const keys =
-
-    [
-      ...new Set([...Object.keys(edits), ...Object.keys(target)])
-    ]
-      return keys.filter(key => edits[key] !== DELETED)
+    ownKeys (target) {
+      return uniqueKeys(edits, target).filter(key => getEdited(target, key) !== DELETED)
     },
 
-    getOwnPropertyDescriptor: (target, key) => {
-      if (edits.hasOwnProperty(key) || target.hasOwnProperty(key)) {
-        return {
-          value: handler.get(target, key),
-          enumerable: true,
-          configurable: true
-        }
-      }
+    getOwnPropertyDescriptor (target, key) {
+      return Object.getOwnPropertyDescriptor(edits.hasOwnProperty(key) ? edits : target, key)
     },
 
     deleteProperty (target, key) {
       edits[key] = DELETED
     }
-  }
-
-  return new Proxy(target, handler)
+  })
 }
 
-module.exports.edits = draft => {
-  if (!draft[EditsSymbol]) throw new Error('edits not found on plain objects')
-  return reduceEdits(draft)
-}
-
-const reduceEdits = obj => {
+function edits (obj) {
   if (!isObject(obj)) return obj
 
-  const edits = obj[EditsSymbol]
-  if (edits) return reduceEdits(edits)
+  if (obj[EDITS]) return edits(obj[EDITS])
 
-  const reduced = mapObj((value, key) => reduceEdits(value))(obj)
+  const reduced = mapObj(edits)(obj)
 
-  return Object.keys(reduced).length ? reduced : undefined
+  return isEmptyObject(reduced) ? undefined : reduced
 }
+
+module.exports = {edit, edits, DELETED}

@@ -50,4 +50,15 @@ describe('Store', () => {
       expect(state.x).toBeUndefined()
     })
   })
+
+  it('works with deleting props', async () => {
+    const s = new Store()
+    await s.transact(state => {
+      state.x = {a: 1}
+    })
+    await s.transact(state => {
+      delete state.x.a
+    })
+    expect(await s.transact(state => state.x.a)).toBeUndefined()
+  })
 })

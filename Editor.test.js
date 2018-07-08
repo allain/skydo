@@ -58,12 +58,24 @@ describe('editor', () => {
     expect(Object.keys(edits(e))).toEqual(['a'])
   })
 
-  it('supports deep deletion', () => {
+  it('sees deletion when edit is being done on an Edit object', () => {
     const src = {a: 1}
     const e1 = edit(src)
     delete e1.a
     const e2 = edit(e1)
     expect(e2.a).toBeUndefined()
     expect(src.a).toEqual(1)
+  })
+
+  it('deletion on deep object works', () => {
+    const src = {}
+    const e1 = edit(src)
+    e1.x = {a: 1}
+    delete e1.x.a
+    expect(e1.x.a).toBeUndefined()
+    expect(Object.keys(e1.x)).toEqual([])
+    expect(e1.x).toEqual({})
+
+    expect(edits(e1)).toEqual({x: {a: DELETED}})
   })
 })
