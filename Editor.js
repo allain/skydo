@@ -7,10 +7,15 @@ const EDITS = Symbol('@Edits')
 const DELETED = Symbol('@Delete')
 
 function edit (target, edits = {}) {
-  if (!isObject(target) || target[EDITS]) return target
+  if (!target || !isObject(target) || target[EDITS]) return target
 
-  const getEdited = (target, key) =>
-    edits.hasOwnProperty(key) ? edits[key] : (edits[key] = edit(target[key]))
+  const getEdited = (target, key) => {
+    if (edits.hasOwnProperty(key)) return edits[key]
+
+    if (target.hasOwnProperty(key)) return (edits[key] = edit(target[key]))
+
+    return undefined
+  }
 
   return new Proxy(target, {
     get (target, key) {
