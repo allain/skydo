@@ -11,7 +11,6 @@ function edit (target, edits = {}) {
 
   const getEdited = (target, key) => {
     if (edits.hasOwnProperty(key)) return edits[key]
-
     if (target.hasOwnProperty(key)) return (edits[key] = edit(target[key]))
 
     return undefined
